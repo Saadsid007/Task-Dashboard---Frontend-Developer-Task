@@ -115,7 +115,7 @@ src/
 
 ### 1. Clone the Repository
 ```bash
-git clone <YOUR_GITHUB_REPO_URL>
+git clone <https://github.com/Saadsid007/Task-Dashboard---Frontend-Developer-Task.git>
 cd task-dashboard
 ```
 
