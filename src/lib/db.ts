@@ -1,33 +1,37 @@
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 const MONGODB_URI = process.env.MONGODB_URI!;
-
 if (!MONGODB_URI) {
   throw new Error("Please define MONGODB_URI in .env.local");
 }
 
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+interface MongooseCache {
+  conn: Mongoose | null;
+  promise: Promise<Mongoose> | null;
 }
 
-export async function connectDB() {
+// @ts-ignore
+let globalWithMongoose = global as typeof global & {
+  mongoose?: MongooseCache;
+};
+
+const cached: MongooseCache =
+  globalWithMongoose.mongoose || {
+    conn: null,
+    promise: null,
+  };
+
+globalWithMongoose.mongoose = cached;
+
+export async function connectDB(): Promise<Mongoose> {
   if (cached.conn) {
     return cached.conn;
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(MONGODB_URI).then((mongoose) => mongoose);
+    cached.promise = mongoose.connect(MONGODB_URI);
   }
 
   cached.conn = await cached.promise;
   return cached.conn;
-}
-
-declare global {
-  var mongoose: {
-    conn: typeof mongoose | null;
-    promise: Promise<typeof mongoose> | null;
-  };
 }
